@@ -77,9 +77,9 @@
         <a href="{{ route('about') }}" class="block py-2 text-white hover:text-orange-400">Tentang Kami</a>
         <a href="{{ route('membership') }}" class="block py-2 text-white hover:text-orange-400">Membership</a>
         <a href="{{ route('trainer') }}" class="block py-2 text-white hover:text-orange-400">Trainer</a>
-        <a href="/login"
+        {{-- <a href="/login"
             class="block w-full text-center mt-2 px-4 py-2 bg-orange-500 text-white rounded-md hover:bg-orange-400 transition duration-200">
             Login
-        </a>
+        </a> --}}
     </div>
 </nav>
