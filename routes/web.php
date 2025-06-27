@@ -17,6 +17,7 @@ use Illuminate\Support\Facades\Route;
 Route::get('/', [LandingPageController::class, 'index'])->name('landing');
 Route::get('/about', [LandingPageController::class, 'about'])->name('about');
 Route::get('/membership', [PaymentController::class, 'index'])->name('membership');
+Route::get('/promo', [LandingPageController::class, 'promo'])->name('promo');
 Route::get('/trainer', [LandingPageController::class, 'trainer'])->name('trainer');
 Route::get('/payment/{type}/{plan}', [PaymentController::class, 'show'])->name('payment.show');
 
