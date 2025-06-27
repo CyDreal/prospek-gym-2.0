@@ -14,8 +14,10 @@ return new class extends Migration
         Schema::create('members', function (Blueprint $table) {
             $table->id();
             $table->string('name');
-            $table->string('email')->unique();
-            $table->string('phone')->nullable();
+            $table->string('alamat');
+            $table->string('phone')->unique();
+            $table->string('paket_nama');
+            $table->string('status')->default('active'); // Assuming a status field is needed
             $table->timestamps();
         });
     }

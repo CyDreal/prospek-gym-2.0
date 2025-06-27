@@ -23,9 +23,11 @@
             <thead class="table-dark">
                 <tr>
                     <th scope="col">No</th>
-                    <th scope="col">Name</th>
-                    <th scope="col">Email</th>
-                    <th scope="col">Phone</th>
+                    <th scope="col">Nama</th>
+                    <th scope="col">Alamat</th>
+                    <th scope="col">No.hp</th>
+                    <th scope="col">Paket Yang Diambil</th>
+                    <th scope="col">Status</th>
                     <th scope="col" style="width: 150px;">Actions</th>
                 </tr>
             </thead>
@@ -34,8 +36,14 @@
                     <tr>
                         <td>{{ $index + 1 }}</td>
                         <td>{{ $member->name }}</td>
-                        <td>{{ $member->email }}</td>
+                        <td>{{ $member->alamat }}</td>
                         <td>{{ $member->phone }}</td>
+                        <td>{{ $member->paket_nama ?? 'N/A' }}</td>
+                        <td>
+                            <span class="badge bg-{{ $member->status == 'active' ? 'success' : 'danger' }}">
+                                {{ ucfirst($member->status) }}
+                            </span>
+                        </td>
                         <td>
                             <a href="{{ route('members.edit', $member->id) }}" class="btn btn-sm btn-warning">Edit</a>
                             <form action="{{ route('members.update', $member->id) }}" method="POST">
