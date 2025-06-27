@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Member;
+use App\Models\Paket;
 use Illuminate\Http\Request;
 
 class MemberController extends Controller
@@ -15,15 +16,19 @@ class MemberController extends Controller
 
     public function create()
     {
-        return view('member.create');
+        $pakets = Paket::all();
+        return view('member.create', compact('pakets'));
     }
 
     public function store(Request $request)
     {
         $validated = $request->validate([
             'name' => 'required',
-            'email' => 'required|email|unique:members',
-            'phone' => 'required',
+            'alamat' => 'required',
+            'phone' => 'required|numeric|unique:members',
+            'paket_nama' => 'required|exists:pakets,nama',
+            'status' => 'required|in:active,inactive',
+
         ]);
 
         Member::create($validated);
@@ -40,22 +45,27 @@ class MemberController extends Controller
     public function edit(string $id)
     {
         $member = Member::findOrFail($id);
-        return view('member.edit', compact('member'));
+        $pakets = Paket::all();
+        return view('member.edit', compact('member', 'pakets'));
     }
 
     public function update(Request $request, string $id)
     {
         $request->validate([
             'name' => 'required',
-            'email' => 'required|email',
-            'phone' => 'required',
+            'alamat' => 'required',
+            'phone' => 'required|numeric|unique:members,phone,' . $id,
+            'paket_nama' => 'required|exists:pakets,nama',
+            'status' => 'required|in:active,inactive',
         ]);
 
         $member = Member::findOrFail($id);
         $member->update([
             'name' => $request->name,
-            'email' => $request->email,
+            'alamat' => $request->alamat,
             'phone' => $request->phone,
+            'paket_nama' => $request->paket_nama,
+            'status' => $request->status,
         ]);
 
         return redirect()->route('members.index')->with('success', 'Member updated successfully.');
