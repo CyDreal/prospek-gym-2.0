@@ -13,7 +13,7 @@ class PromotionController extends Controller
      */
     public function index()
     {
-        $promotions = Promotion::all();
+        $promotions = Promotion::ordered()->get();
         return view('promotions.index', compact('promotions'));
     }
 
@@ -31,18 +31,24 @@ class PromotionController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'image' => 'required|image',
+            'title' => 'required|string|max:255',
+            'image' => 'required|image|max:2048',
             'description' => 'required|string',
+            'is_active' => 'boolean',
+            'sort_order' => 'integer|min:0',
         ]);
 
         $path = $request->file('image')->store('promotions', 'public');
 
         Promotion::create([
+            'title' => $request->title,
             'image' => $path,
             'description' => $request->description,
+            'is_active' => $request->has('is_active'),
+            'sort_order' => $request->sort_order ?? 0,
         ]);
 
-        return redirect()->route('promotions.index')->with('success', 'Promotion added');
+        return redirect()->route('promotions.index')->with('success', 'Promotion added successfully');
     }
 
     /**
@@ -70,8 +76,11 @@ class PromotionController extends Controller
         $promotion = Promotion::findOrFail($id);
 
         $request->validate([
+            'title' => 'required|string|max:255',
             'description' => 'required|string',
-            'image' => 'nullable|image',
+            'image' => 'nullable|image|max:2048',
+            'is_active' => 'boolean',
+            'sort_order' => 'integer|min:0',
         ]);
 
         if ($request->hasFile('image')) {
@@ -79,10 +88,14 @@ class PromotionController extends Controller
             $promotion->image = $request->file('image')->store('promotions', 'public');
         }
 
-        $promotion->description = $request->description;
-        $promotion->save();
+        $promotion->update([
+            'title' => $request->title,
+            'description' => $request->description,
+            'is_active' => $request->has('is_active'),
+            'sort_order' => $request->sort_order ?? 0,
+        ]);
 
-        return redirect()->route('promotions.index')->with('success', 'Promotion updated');
+        return redirect()->route('promotions.index')->with('success', 'Promotion updated successfully');
     }
 
     /**
@@ -94,6 +107,12 @@ class PromotionController extends Controller
         Storage::disk('public')->delete($promotion->image);
         $promotion->delete();
 
-        return redirect()->route('promotions.index')->with('success', 'Promotion deleted');
+        return redirect()->route('promotions.index')->with('success', 'Promotion deleted successfully');
+    }
+
+    // Method untuk frontend
+    public function getActivePromotions()
+    {
+        return Promotion::active()->ordered()->get();
     }
 }

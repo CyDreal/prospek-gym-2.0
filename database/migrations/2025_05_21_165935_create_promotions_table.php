@@ -13,8 +13,11 @@ return new class extends Migration
     {
         Schema::create('promotions', function (Blueprint $table) {
             $table->id();
-            $table->string('image'); // path gambar (misal: promotions/abc.jpg)
-            $table->text('description');
+            $table->string('title'); // Judul promo
+            $table->string('image'); // path gambar promo
+            $table->text('description'); // Konten HTML promo
+            $table->boolean('is_active')->default(true); // Status aktif/tidak
+            $table->integer('sort_order')->default(0); // Urutan tampil
             $table->timestamps();
         });
     }
