@@ -6,7 +6,7 @@
                 <!-- Logo -->
                 <div class="shrink-0 flex items-center">
                     <a href="{{ route('dashboard') }}">
-                        <x-application-logo class="block h-9 w-auto fill-current text-gray-800" />
+                        <x-application-logo class="block h-9 w-auto" />
                     </a>
                 </div>
 
@@ -105,6 +105,10 @@
 
             <x-responsive-nav-link :href="route('promotions.index')" :active="request()->routeIs('promotions.*')">
                 {{ __('Promotions') }}
+            </x-responsive-nav-link>
+
+            <x-responsive-nav-link :href="route('trainers.index')" :active="request()->routeIs('trainers.*')">
+                {{ __('Trainers') }}
             </x-responsive-nav-link>
         </div>
 

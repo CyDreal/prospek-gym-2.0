@@ -3,6 +3,9 @@
 namespace App\Http\Controllers;
 
 use App\Models\Trainer;
+use App\Models\Specialization;
+use App\Models\TrainingPackage;
+use App\Models\Achievement;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 
@@ -13,7 +16,7 @@ class TrainerController extends Controller
      */
     public function index()
     {
-        $trainers = Trainer::all();
+        $trainers = Trainer::with(['specializations', 'trainingPackages', 'achievements'])->get();
         return view('trainers.index', compact('trainers'));
     }
 
@@ -22,7 +25,8 @@ class TrainerController extends Controller
      */
     public function create()
     {
-        return view('trainers.create');
+        $specializations = Specialization::all();
+        return view('trainers.create', compact('specializations'));
     }
 
     /**
@@ -30,19 +34,77 @@ class TrainerController extends Controller
      */
     public function store(Request $request)
     {
-        $request->validate([
+        $validatedData = $request->validate([
+            'name' => 'required|string|max:255',
+            'role' => 'required|string|max:255',
             'image' => 'required|image',
             'description' => 'required|string',
+            'type' => 'required|in:freelance,inhouse',
+            'instagram_link' => 'nullable|url',
+            'whatsapp_link' => 'nullable|string',
+            'specializations_title' => 'nullable|string',
+            'specializations' => 'array',
+            'specializations.*' => 'exists:specializations,id',
+            'new_specializations' => 'array',
+            'new_specializations.*' => 'nullable|string',
+            'packages' => 'required|array|min:1',
+            'packages.*.sessions' => 'required|string',
+            'packages.*.duration' => 'required|string',
+            'packages.*.price' => 'required|string',
+            'packages.*.sessions_count' => 'required|integer|min:1',
+            'packages.*.price_numeric' => 'required|numeric|min:0',
+            'achievements' => 'array',
+            'achievements.*' => 'nullable|string',
         ]);
 
-        $path = $request->file('image')->store('trainers', 'public');
+        $path = $request->file('image')->store('images', 'public');
 
-        Trainer::create([
+        $trainer = Trainer::create([
+            'name' => $request->name,
+            'role' => $request->role,
             'image' => $path,
             'description' => $request->description,
+            'type' => $request->type,
+            'instagram_link' => $request->instagram_link,
+            'whatsapp_link' => $request->whatsapp_link,
+            'specializations_title' => $request->specializations_title,
         ]);
 
-        return redirect()->route('trainers.index')->with('success', 'Trainer added');
+        // Handle specializations
+        $specializationIds = [];
+
+        // Existing specializations
+        if ($request->has('specializations')) {
+            $specializationIds = array_merge($specializationIds, $request->specializations);
+        }
+
+        // New specializations
+        if ($request->has('new_specializations')) {
+            foreach ($request->new_specializations as $newSpec) {
+                if (!empty(trim($newSpec))) {
+                    $specialization = Specialization::create(['name' => trim($newSpec)]);
+                    $specializationIds[] = $specialization->id;
+                }
+            }
+        }
+
+        $trainer->specializations()->attach($specializationIds);
+
+        // Create training packages
+        foreach ($request->packages as $package) {
+            $trainer->trainingPackages()->create($package);
+        }
+
+        // Create achievements
+        if ($request->has('achievements')) {
+            foreach ($request->achievements as $achievement) {
+                if (!empty(trim($achievement))) {
+                    $trainer->achievements()->create(['title' => trim($achievement)]);
+                }
+            }
+        }
+
+        return redirect()->route('trainers.index')->with('success', 'Trainer added successfully');
     }
 
     /**
@@ -58,8 +120,9 @@ class TrainerController extends Controller
      */
     public function edit(string $id)
     {
-        $trainer = Trainer::findOrFail($id);
-        return view('trainers.edit', compact('trainer'));
+        $trainer = Trainer::with(['specializations', 'trainingPackages', 'achievements'])->findOrFail($id);
+        $specializations = Specialization::all();
+        return view('trainers.edit', compact('trainer', 'specializations'));
     }
 
     /**
@@ -70,8 +133,16 @@ class TrainerController extends Controller
         $trainer = Trainer::findOrFail($id);
 
         $request->validate([
+            'name' => 'required|string|max:255',
+            'role' => 'required|string|max:255',
             'description' => 'required|string',
+            'type' => 'required|in:freelance,inhouse',
             'image' => 'nullable|image',
+            'instagram_link' => 'nullable|url',
+            'whatsapp_link' => 'nullable|string',
+            'specializations_title' => 'nullable|string',
+            'specializations' => 'array',
+            'specializations.*' => 'exists:specializations,id',
         ]);
 
         if ($request->hasFile('image')) {
@@ -79,10 +150,20 @@ class TrainerController extends Controller
             $trainer->image = $request->file('image')->store('trainers', 'public');
         }
 
-        $trainer->description = $request->description;
-        $trainer->save();
+        $trainer->update([
+            'name' => $request->name,
+            'role' => $request->role,
+            'description' => $request->description,
+            'type' => $request->type,
+            'instagram_link' => $request->instagram_link,
+            'whatsapp_link' => $request->whatsapp_link,
+            'specializations_title' => $request->specializations_title,
+        ]);
 
-        return redirect()->route('trainers.index')->with('success', 'Trainer updated');
+        // Sync specializations
+        $trainer->specializations()->sync($request->specializations ?? []);
+
+        return redirect()->route('trainers.index')->with('success', 'Trainer updated successfully');
     }
 
     /**
@@ -94,6 +175,16 @@ class TrainerController extends Controller
         Storage::disk('public')->delete($trainer->image);
         $trainer->delete();
 
-        return redirect()->route('trainers.index')->with('success', 'Trainers deleted');
+        return redirect()->route('trainers.index')->with('success', 'Trainer deleted successfully');
+    }
+
+    // Method untuk mengambil data sesuai format frontend
+    public function getTrainersForFrontend()
+    {
+        $trainers = Trainer::with(['specializations', 'trainingPackages', 'achievements'])->get();
+
+        return $trainers->map(function ($trainer) {
+            return $trainer->formatted_data;
+        });
     }
 }
