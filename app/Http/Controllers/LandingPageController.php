@@ -26,4 +26,9 @@ class LandingPageController extends Controller
         return view('landing.trainer');
     }
 
+    public function promo()
+    {
+        return view('landing.promo');
+    }
+
 }

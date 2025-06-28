@@ -25,7 +25,14 @@
 
             <!-- Desktop Menu -->
             <div class="hidden sm:flex space-x-6 items-center">
-                <a href="{{ route('about') }}" class="text-white hover:text-orange-400 transition-colors duration-200"
+
+                 <a href="{{ route('promo') }}"
+                   class="text-white hover:text-orange-400 transition-colors duration-200"
+                   :class="{ 'text-white': atTop, 'text-orange-500': !atTop }">
+                    Promo
+                </a>
+                <a href="{{ route('about') }}" 
+                    class="text-white hover:text-orange-400 transition-colors duration-200"
                     :class="{ 'text-white': atTop, 'text-orange-500': !atTop }">
                     Tentang Kami
                 </a>
