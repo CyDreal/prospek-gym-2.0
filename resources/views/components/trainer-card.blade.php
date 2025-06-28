@@ -5,7 +5,7 @@
         class="relative bg-neutral-800 rounded-2xl p-8 ring-1 ring-gray-700/50 hover:ring-orange-500/50 transition-all duration-300 h-full flex flex-col">
         <!-- Profile Image -->
         <div class="relative w-32 h-32 mx-auto mb-6 shrink-0">
-            <img src="{{ asset($trainer['image']) }}" alt="{{ $trainer['name'] }}"
+            <img src="{{ asset('storage/' .$trainer['image']) }}" alt="{{ $trainer['name'] }}"
                 class="w-full h-full object-cover rounded-full ring-4 ring-orange-500/20">
         </div>
 

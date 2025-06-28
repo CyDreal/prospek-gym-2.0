@@ -13,8 +13,14 @@ return new class extends Migration
     {
         Schema::create('trainers', function (Blueprint $table) {
             $table->id();
+            $table->string('name');
+            $table->string('role')->default('Personal Trainer');
             $table->string('image'); // path gambar (misal: promotions/abc.jpg)
             $table->text('description');
+            $table->enum('type', ['freelance', 'inhouse'])->default('freelance');
+            $table->string('instagram_link')->nullable();
+            $table->string('whatsapp_link')->nullable();
+            $table->string('specializations_title')->nullable(); // untuk kasus khusus seperti "Kelas Cardio & Body Conditioning"
             $table->timestamps();
         });
     }
