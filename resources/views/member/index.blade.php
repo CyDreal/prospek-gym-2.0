@@ -7,11 +7,57 @@
     </x-slot>
 
 
+
     <div class="container mt-4">
+
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h2 class="fw-bold"></h2>
+            <a href="{{ route('members.export') }}" class="btn btn-success">Export to Excel</a>
+
+        </div>
+
         <div class="d-flex justify-content-between align-items-center mb-3">
             <h2 class="fw-bold"></h2>
             <a href="{{ route('members.create') }}" class="btn btn-primary">+ Add Member</a>
+
         </div>
+
+
+        <form action="{{ route('members.index') }}" method="GET" class="row g-3 mb-4">
+            <div class="col-md-4">
+                <input type="text" name="search" class="form-control" placeholder="Cari nama/alamat/telepon..."
+                    value="{{ request('search') }}">
+            </div>
+
+            <div class="col-md-3">
+                <select name="status" class="form-select">
+                    <option value="">-- Semua Status --</option>
+                    <option value="active" {{ request('status') == 'active' ? 'selected' : '' }}>Active</option>
+                    <option value="inactive" {{ request('status') == 'inactive' ? 'selected' : '' }}>Inactive</option>
+                </select>
+            </div>
+
+            <div class="col-md-3">
+                <select name="paket_nama" class="form-select">
+                    <option value="">-- Semua Paket --</option>
+                    @foreach ($pakets as $paket)
+                        <option value="{{ $paket->nama }}"
+                            {{ request('paket_nama') == $paket->nama ? 'selected' : '' }}>
+                            {{ $paket->nama }}
+                        </option>
+                    @endforeach
+                </select>
+            </div>
+
+            <div class="col-md-2">
+                <button class="btn btn-primary w-100" type="submit">Filter</button>
+            </div>
+        </form>
+        @if ($members->isEmpty())
+            <div class="alert alert-info">
+                Tidak ada anggota yang ditemukan.
+            </div>
+        @endif
 
         @if (session('success'))
             <div class="alert alert-success">
@@ -62,6 +108,9 @@
                 @endforeach
             </tbody>
         </table>
+        {{ $members->withQueryString()->links() }}
+
+
     </div>
 
 

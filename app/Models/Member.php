@@ -13,4 +13,11 @@ class Member extends Model
     {
         return 'id';
     }
+
+    public function scopeSearch($query, $term)
+    {
+        return $query->where('name', 'like', "%{$term}%")
+            ->orWhere('alamat', 'like', "%{$term}%")
+            ->orWhere('phone', 'like', "%{$term}%");
+    }
 }
