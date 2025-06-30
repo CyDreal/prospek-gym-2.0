@@ -4,14 +4,41 @@ namespace App\Http\Controllers;
 
 use App\Models\Member;
 use App\Models\Paket;
+use App\Exports\MembersExport;
+use Maatwebsite\Excel\Facades\Excel;
 use Illuminate\Http\Request;
 
 class MemberController extends Controller
 {
-    public function index()
+
+    public function export()
     {
-        $members = Member::all();
-        return view('member.index', compact('members'));
+        return Excel::download(new MembersExport, 'members.xlsx');
+    }
+
+    public function index(Request $request)
+    {
+        $search = $request->search;
+        $status = $request->status;
+        $paket = $request->paket_nama;
+
+        $members = Member::query()
+            ->when($search, function ($query, $search) {
+                $query->where('name', 'like', "%{$search}%")
+                    ->orWhere('alamat', 'like', "%{$search}%")
+                    ->orWhere('phone', 'like', "%{$search}%");
+            })
+            ->when($status, function ($query, $status) {
+                $query->where('status', $status);
+            })
+            ->when($paket, function ($query, $paket) {
+                $query->where('paket_nama', $paket);
+            })
+            ->paginate(10);
+
+        $pakets = \App\Models\Paket::all(); // untuk menampilkan daftar paket di select box
+
+        return view('member.index', compact('members', 'pakets'));
     }
 
     public function create()

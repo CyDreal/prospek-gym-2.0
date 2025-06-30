@@ -25,12 +25,15 @@ Route::get('/dashboard', function () {
     return view('dashboard');
 })->middleware(['auth', 'verified'])->name('dashboard');
 
+Route::get('/members/export', [MemberController::class, 'export'])->name('members.export');
+
 Route::get('members', [MemberController::class, 'index'])->name('members.index');
 Route::resource('members', MemberController::class);
 Route::get('promotions', [promotionController::class, 'index'])->name('promotions.index');
 Route::resource('promotions', PromotionController::class);
 Route::get('trainers', [TrainerController::class, 'index'])->name('trainers.index');
 Route::resource('trainers', TrainerController::class);
+
 
 
 
